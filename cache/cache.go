@@ -1,4 +1,4 @@
-package gocom
+package cache
 
 import "github.com/diffguo/gocom/cache/redis"
 
