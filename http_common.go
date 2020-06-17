@@ -2,7 +2,7 @@ package gocom
 
 import (
 	"encoding/json"
-	"gocom/log"
+	"github.com/diffguo/gocom/log"
 	"io"
 	"io/ioutil"
 	"net/http"

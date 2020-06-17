@@ -3,8 +3,8 @@ package log
 import (
 	"fmt"
 	"github.com/chanxuehong/util/math"
-	"gocom/goroutineid"
-	"gocom/trace_id"
+	"github.com/diffguo/gocom/goroutineid"
+	"github.com/diffguo/gocom/trace_id"
 	"log"
 	"os"
 	"strings"

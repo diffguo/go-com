@@ -1,6 +1,6 @@
 package gocom
 
-import "gocom/cache/redis"
+import "github.com/diffguo/gocom/cache/redis"
 
 var redisCache *redis.Redis
 

@@ -2,8 +2,8 @@ package gocom
 
 import (
 	"fmt"
-	"gocom/goroutineid"
-	"gocom/log"
+	"github.com/diffguo/gocom/goroutineid"
+	"github.com/diffguo/gocom/log"
 	"runtime"
 	"time"
 )

@@ -3,7 +3,7 @@ package trace_id
 import (
 	"encoding/hex"
 	"fmt"
-	"gocom/goroutineid"
+	"github.com/diffguo/gocom/goroutineid"
 	"net"
 	"strings"
 	"sync"

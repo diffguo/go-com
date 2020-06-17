@@ -1,4 +1,4 @@
-module gocom
+module github.com/diffguo/gocom
 
 go 1.12
 
