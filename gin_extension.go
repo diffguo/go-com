@@ -238,7 +238,6 @@ var mWhitePathMap = map[string]Empty{
 	"/debug/pprof/*":  empty,
 	"/swagger/*":      empty,
 	"/api/callback/*": empty,
-	"/api/login":      empty,
 	"/api/login/*":    empty,
 }
 
