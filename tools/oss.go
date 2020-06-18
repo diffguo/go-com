@@ -1,16 +1,18 @@
 package tools
 
 import (
+	"fmt"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/diffguo/gocom/log"
 	"io"
 )
 
 type OssBucket struct {
-	bucket *oss.Bucket
+	bucket      *oss.Bucket
+	clientCache string
 }
 
-func InitOssBucket(endPoint, accessKeyID, accessKeySecret, bucketName string) (*OssBucket, error) {
+func InitOssBucket(endPoint, accessKeyID, accessKeySecret, bucketName string, clientCacheTime int /*单位秒*/) (*OssBucket, error) {
 	client, err := oss.New(endPoint, accessKeyID, accessKeySecret)
 	if err != nil {
 		log.Errorf("init oss client error: %s", err.Error())
@@ -23,13 +25,13 @@ func InitOssBucket(endPoint, accessKeyID, accessKeySecret, bucketName string) (*
 		return nil, err
 	}
 
-	return &OssBucket{bucket: bucket}, nil
+	return &OssBucket{bucket: bucket, clientCache: fmt.Sprintf("max-age=%d", clientCacheTime)}, nil
 }
 
-func (bucket *OssBucket) UploadToTWNoExpireOss(resourcePath string, contentType string, reader io.Reader) bool {
+func (bucket *OssBucket) UploadToOss(resourcePath string, contentType string, reader io.Reader) bool {
 	options := []oss.Option{
 		oss.ContentType(contentType),
-		oss.CacheControl("max-age=31536000"), /*缓存365天*/
+		oss.CacheControl(bucket.clientCache), /*缓存365天*/
 	}
 
 	signedURL, err := bucket.bucket.SignURL(resourcePath, oss.HTTPPut, 60, options...)
@@ -49,7 +51,7 @@ func (bucket *OssBucket) UploadToTWNoExpireOss(resourcePath string, contentType 
 	return true
 }
 
-func (bucket *OssBucket) DeleteTWOssRes(resourcePath string) bool {
+func (bucket *OssBucket) DeleteOssRes(resourcePath string) bool {
 	err := bucket.bucket.DeleteObject(resourcePath)
 	if err != nil {
 		log.Errorf("delete house res err: %s", err.Error())
