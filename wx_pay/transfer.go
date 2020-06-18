@@ -8,7 +8,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"go-com/log"
+	"github.com/diffguo/gocom/log"
 	"hash"
 	"io"
 	"io/ioutil"
@@ -41,11 +41,10 @@ import (
 
 // 微信企业支付
 func WXTransfer(amount int, openid, tradeNo, desc, createIP string) (rsp WeiXinTransferPayRsp, err error) {
-
 	//计算签名
 	params := make(map[string]string, 16)
-	params["mch_appid"] = WX_APP_ID
-	params["mchid"] = WX_MCH_ID
+	params["mch_appid"] = WXPayClient.AppId
+	params["mchid"] = WXPayClient.MchId
 	params["nonce_str"] = genRandomStr()
 	params["partner_trade_no"] = tradeNo
 	params["openid"] = openid
@@ -53,7 +52,7 @@ func WXTransfer(amount int, openid, tradeNo, desc, createIP string) (rsp WeiXinT
 	params["amount"] = fmt.Sprintf("%d", 1)
 	params["desc"] = desc
 	params["spbill_create_ip"] = createIP
-	sign := sign(params, WX_APP_KEY, nil)
+	sign := sign(params, WXPayClient.ApiKey, nil)
 	params["sign"] = sign
 
 	rs, err := formatMapToXMLStr(params)
@@ -87,11 +86,11 @@ func WXTransfer(amount int, openid, tradeNo, desc, createIP string) (rsp WeiXinT
 func GetTransferInfo(tradeNO string) {
 	//计算签名
 	params := make(map[string]string, 16)
-	params["appid"] = WX_APP_ID
-	params["mch_id"] = WX_MCH_ID
+	params["appid"] = WXPayClient.AppId
+	params["mch_id"] = WXPayClient.MchId
 	params["nonce_str"] = genRandomStr()
 	params["partner_trade_no"] = tradeNO
-	sign := sign(params, WX_APP_KEY, nil)
+	sign := sign(params, WXPayClient.ApiKey, nil)
 	params["sign"] = sign
 
 	rs, err := formatMapToXMLStr(params)
@@ -208,7 +207,7 @@ func sign(parameters map[string]string, apiKey string, fn func() hash.Hash) stri
 }
 
 func getWXMpTlsClient() (httpClient *http.Client, err error) {
-	return newTLSHttpClient([]byte(WX_CERT), []byte(WX_KEY))
+	return newTLSHttpClient(WXPayClient.WXCert, WXPayClient.WXKey)
 }
 
 func formatMapToXMLStr(m map[string]string) (rs string, err error) {

@@ -7,7 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/xml"
 	"fmt"
-	"go-com/log"
+	"github.com/diffguo/gocom/log"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -24,14 +24,28 @@ import (
 - DoWXRefund 申请退款
 */
 
-var WXPayClient = newWXPayClient(WX_APP_ID, WX_MCH_ID, WX_APP_KEY)
+var WXPayClient *Client // InitWXPayClient(WX_APP_ID, WX_MCH_ID, WX_APP_KEY)
+
+// 实例化API客户端
+func InitWXPayClient(appId, mchId, apiKey, wxKey, wxCert string) *Client {
+	WXPayClient = &Client{
+		stdClient: &http.Client{},
+		AppId:     appId,
+		MchId:     mchId,
+		ApiKey:    apiKey,
+		WXKey:     []byte(wxKey),
+		WXCert:    []byte(wxCert),
+	}
+
+	return WXPayClient
+}
 
 // 用户下单
 func PlaceAnWXPayOrder(orderNo, orderBody string, totalFee int, clientIP, notifyURL, openID string) (*WXPayParams, error) {
 	log.Infof("PlaceAnWXPayOrder ExtOrderId: %s totalFee: %d, openID: %s orderBody: %s", orderNo, totalFee, totalFee, openID, orderBody)
 
 	// 附着商户证书
-	if err := WXPayClient.WithCertBytes([]byte(WX_CERT), []byte(WX_KEY)); err != nil {
+	if err := WXPayClient.WithCertBytes(WXPayClient.WXCert, WXPayClient.WXKey); err != nil {
 		log.Errorf("WithCertBytes Err: %s", err.Error())
 		return nil, err
 	}
@@ -78,7 +92,7 @@ func DoWXRefund(transactionID, outRefundNo string, totalFee, refundFee int, refu
 	log.Infof("DoWXRefund WXOrderId: %s ExtOrderId: %s totalFee: %d, refundFee: %d refundDesc: %s", transactionID, outRefundNo, totalFee, refundFee, refundDesc)
 
 	// 附着商户证书
-	if err := WXPayClient.WithCertBytes([]byte(WX_CERT), []byte(WX_KEY)); err != nil {
+	if err := WXPayClient.WithCertBytes(WXPayClient.WXCert, WXPayClient.WXKey); err != nil {
 		log.Errorf("WithCertBytes Err: %s", err.Error())
 		return err
 	}
@@ -127,16 +141,8 @@ type Client struct {
 	AppId  string
 	MchId  string
 	ApiKey string
-}
-
-// 实例化API客户端
-func newWXPayClient(appId, mchId, apiKey string) *Client {
-	return &Client{
-		stdClient: &http.Client{},
-		AppId:     appId,
-		MchId:     mchId,
-		ApiKey:    apiKey,
-	}
+	WXKey  []byte
+	WXCert []byte
 }
 
 // 设置请求超时时间

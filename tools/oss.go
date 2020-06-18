@@ -2,7 +2,7 @@ package tools
 
 import (
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
-	"go-com/log"
+	"github.com/diffguo/gocom/log"
 	"io"
 )
 
@@ -15,9 +15,14 @@ type OssSignParam struct {
 	CResource   string
 }
 
-var AccessKeyID = "LTAI4FrZeNtmvzqSh4dWCApL"
-var AccessKeySecret = "1RaNDXPxVZy11KbKuL4ZdPhePhZC4a"
+var AccessKeyID = ""
+var AccessKeySecret = ""
 var OssHouseBucket *oss.Bucket = nil
+
+func InitOss(accessKeyID, accessKeySecret string) {
+	AccessKeyID = accessKeyID
+	AccessKeySecret = accessKeySecret
+}
 
 func UploadToTWNoExpireOss(resourcePath string, contentType string, reader io.Reader) bool {
 	if OssHouseBucket == nil {

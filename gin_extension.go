@@ -15,7 +15,16 @@ import (
 	"time"
 )
 
-var AuthAes = NewAesCbcPKCS7("XGYUZj78QvlvyHQ1eKeSeNhCJcJRQOyQ")
+var AuthAes *AesCbcPKCS7
+
+func InitGinAuth(key string) error {
+	if len(key) != 32 {
+		return fmt.Errorf("key must by 32bytes length")
+	}
+
+	AuthAes = NewAesCbcPKCS7(key)
+	return nil
+}
 
 func GinLogger(threshold time.Duration) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -37,11 +46,11 @@ func GinLogger(threshold time.Duration) gin.HandlerFunc {
 						log.Debugf("[GIN DEBUG] %s %s URL: %s Header: %+v Body: %s", c.Request.Method, c.Request.Proto,
 							c.Request.URL.String(), c.Request.Header, string(body))
 					} else {
-						log.Debugf("[GIN DEBUG] %s %s URL: %s Header: %+v Body err", c.Request.Method, c.Request.Proto,
+						log.Debugf("[GIN DEBUG] %s %s URL: %s Header: %+v. Body err", c.Request.Method, c.Request.Proto,
 							c.Request.URL.String(), c.Request.Header)
 					}
 				} else {
-					log.Debugf("[GIN DEBUG] %s %s URL: %s Header: %+v Body err", c.Request.Method, c.Request.Proto,
+					log.Debugf("[GIN DEBUG] %s %s URL: %s Header: %+v", c.Request.Method, c.Request.Proto,
 						c.Request.URL.String(), c.Request.Header)
 				}
 			}
@@ -115,20 +124,6 @@ type ResponseHead struct {
 func SendSimpleResponse(c *gin.Context, content interface{}) {
 	SendResponseImp(c, content, 0, "")
 }
-
-//func SendResponse(c *gin.Context, content interface{}, errCode int) {
-//	if errCode == 0 {
-//		SendResponseImp(c, content, 0, "")
-//		return
-//	}
-//
-//	if errCode >= ErrCodeParamErr {
-//		SendResponseImp(c, content, errCode, MapErrCode2Desc[errCode])
-//		return
-//	}
-//
-//	SendResponseImp(c, content, errCode, "")
-//}
 
 func SendResponseImp(c *gin.Context, content interface{}, errCode int, errDesc string) {
 	c.Writer.Header().Set("Content-Type", "application/json")
@@ -238,16 +233,18 @@ func CheckAuth() gin.HandlerFunc {
 }
 
 var mWhitePathMap = map[string]Empty{
-	"/favicon.ico":        empty,
-	"/wx/wx_login":        empty,
-	"/admin/login":        empty,
-	"/wechat/wx_callback": empty,
-	"/test/*":             empty,
-	"/debug/pprof/*":      empty,
-	"/swagger/*":          empty,
+	"/favicon.ico":    empty,
+	"/test/*":         empty,
+	"/debug/pprof/*":  empty,
+	"/swagger/*":      empty,
+	"/api/callback/*": empty,
+	"/api/login":      empty,
+	"/api/login/*":    empty,
 }
 
-var mWhitePathMapLen = len(mWhitePathMap)
+func AddWhiteList(url string) {
+	mWhitePathMap[url] = empty
+}
 
 func isPathInWhiteList(path string) bool {
 	for k, _ := range mWhitePathMap {

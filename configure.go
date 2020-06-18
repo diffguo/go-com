@@ -3,11 +3,9 @@ package gocom
 import (
 	"encoding/json"
 	"fmt"
-	//"github.com/coreos/go-etcd/etcd"
 	"io/ioutil"
 	"log"
 	"os"
-	//"strings"
 	"time"
 )
 
