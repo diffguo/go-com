@@ -81,10 +81,14 @@ func (bucket *OssBucket) DeleteOssRes(resourcePath string) bool {
 
 // 获取客户端直传签名
 // 客户端直传文档：https://help.aliyun.com/document_detail/31925.html， go demo：https://help.aliyun.com/document_detail/91818.html?spm=a2c4g.11186623.2.18.6ff36e28eGmN06#concept-mhj-zzt-2fb
-func (bucket *OssBucket) GetPolicyToken() string {
+func (bucket *OssBucket) GetPolicyToken(tokenExpireTime int64) string {
 	now := time.Now().Unix()
-	expireEnd := now + bucket.tokenExpireTime
-	var tokenExpire = get_gmt_iso8601(expireEnd)
+	if tokenExpireTime == 0 {
+		tokenExpireTime = bucket.tokenExpireTime
+	}
+
+	expireEnd := now + tokenExpireTime
+	var tokenExpire = getGmtIso8601(expireEnd)
 
 	//create post policy json
 	var config ConfigStruct

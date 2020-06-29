@@ -15,8 +15,8 @@ import (
 	"time"
 )
 
-func get_gmt_iso8601(expire_end int64) string {
-	var tokenExpire = time.Unix(expire_end, 0).Format("2006-01-02T15:04:05Z")
+func getGmtIso8601(expireEnd int64) string {
+	var tokenExpire = time.Unix(expireEnd, 0).Format("2006-01-02T15:04:05Z")
 	return tokenExpire
 }
 
