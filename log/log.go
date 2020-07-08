@@ -94,21 +94,9 @@ func InitLog(logDir string, logFile string, logStrLevel string, LogMaxSize int) 
 	}
 
 	simpleLog := SimpleLog{LogMaxSize: LogMaxSize}
-
-	if logStrLevel == "debug" {
-		simpleLog.LogLevel = LogLevelDebug
-	}
-
-	if logStrLevel == "info" {
-		simpleLog.LogLevel = LogLevelInfo
-	}
-
-	if logStrLevel == "warn" {
-		simpleLog.LogLevel = LogLevelWarn
-	}
-
-	if logStrLevel == "error" {
-		simpleLog.LogLevel = LogLevelError
+	simpleLog.LogLevel = getLogLevel(logStrLevel)
+	if simpleLog.LogLevel == 0 {
+		return nil, fmt.Errorf("wrong log level: %s", logStrLevel)
 	}
 
 	simpleLog.FileFullName = logDir + "/" + logFile
@@ -137,6 +125,26 @@ func InitLog(logDir string, logFile string, logStrLevel string, LogMaxSize int) 
 
 	simpleLog.rotate()
 	return &simpleLog, nil
+}
+
+func getLogLevel(logStrLevel string) int {
+	if logStrLevel == "debug" {
+		return LogLevelDebug
+	}
+
+	if logStrLevel == "info" {
+		return LogLevelInfo
+	}
+
+	if logStrLevel == "warn" {
+		return LogLevelWarn
+	}
+
+	if logStrLevel == "error" {
+		return LogLevelError
+	}
+
+	return 0
 }
 
 func (slog *SimpleLog) rotate() {

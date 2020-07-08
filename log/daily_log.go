@@ -30,21 +30,9 @@ func InitDailyLog(logDir string, logFile string, logStrLevel string) (*DailyLog,
 	}
 
 	dailyLog := DailyLog{}
-
-	if logStrLevel == "debug" {
-		dailyLog.LogLevel = LogLevelDebug
-	}
-
-	if logStrLevel == "info" {
-		dailyLog.LogLevel = LogLevelInfo
-	}
-
-	if logStrLevel == "warn" {
-		dailyLog.LogLevel = LogLevelWarn
-	}
-
-	if logStrLevel == "error" {
-		dailyLog.LogLevel = LogLevelError
+	dailyLog.LogLevel = getLogLevel(logStrLevel)
+	if dailyLog.LogLevel == 0 {
+		return nil, fmt.Errorf("wrong log level: %s", logStrLevel)
 	}
 
 	dailyLog.FileFullName = logDir + "/" + logFile
