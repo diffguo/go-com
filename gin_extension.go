@@ -215,7 +215,7 @@ func CheckAuth() gin.HandlerFunc {
 			return
 		}
 
-		userId, err := strconv.ParseInt(items[4], 10, 64)
+		userId, err := strconv.ParseInt(items[3], 10, 64)
 		if err != nil {
 			SendResponseImp(c, "", http.StatusUnauthorized, "Wrong Authorization, Parse userId err")
 			log.Error("token wrong userId")
