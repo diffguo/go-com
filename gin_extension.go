@@ -320,8 +320,13 @@ func Bind(c *gin.Context, obj interface{}) bool {
 			return false
 		}
 
-		for _, err := range err.(validator.ValidationErrors) {
-			log.Errorf("bind err. ValidationError. StructField: %s, Tag: %s %s, Type: %+v, Value: %+v", err.StructNamespace(), err.ActualTag(), err.Param(), err.Type(), err.Value())
+		errs, ok := err.(validator.ValidationErrors)
+		if ok {
+			for _, err := range errs {
+				log.Errorf("bind err. ValidationError. StructField: %s, Tag: %s %s, Type: %+v, Value: %+v", err.StructNamespace(), err.ActualTag(), err.Param(), err.Type(), err.Value())
+			}
+		} else {
+			log.Errorf("bind err. Unknown Err: %s", err.Error())
 		}
 
 		return false
