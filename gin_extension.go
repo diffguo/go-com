@@ -43,8 +43,13 @@ func GinLogger(threshold time.Duration) gin.HandlerFunc {
 					c.Request.Body = ioutil.NopCloser(bytes.NewReader(body))
 
 					if body != nil {
-						log.Debugf("[GIN DEBUG] %s %s URL: %s Header: %+v Body: %s", c.Request.Method, c.Request.Proto,
-							c.Request.URL.String(), c.Request.Header, string(body))
+						if contentType == gin.MIMEMultipartPOSTForm {
+							log.Debugf("[GIN DEBUG] %s %s URL: %s Header: %+v Body: %s", c.Request.Method, c.Request.Proto,
+								c.Request.URL.String(), c.Request.Header, string(body))
+						} else {
+							log.Debugf("[GIN DEBUG] %s %s URL: %s Header: %+v Body: file", c.Request.Method, c.Request.Proto,
+								c.Request.URL.String(), c.Request.Header)
+						}
 					} else {
 						log.Debugf("[GIN DEBUG] %s %s URL: %s Header: %+v. Body err", c.Request.Method, c.Request.Proto,
 							c.Request.URL.String(), c.Request.Header)
