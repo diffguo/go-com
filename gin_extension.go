@@ -339,3 +339,44 @@ func Bind(c *gin.Context, obj interface{}) bool {
 		return true
 	}
 }
+
+// 如果绑定失败，则返回错误描述
+func Bind2(c *gin.Context, obj interface{}) (bool, string) {
+	retErr := false
+	if log.GLog != nil && (log.GLog.LogLevel == log.LogLevelDebug) {
+		retErr = true
+	}
+
+	err := c.Bind(obj)
+	if err != nil {
+		// this check is only needed when your code could produce
+		// an invalid value for validation such as interface with nil
+		// value most including myself do not usually have code like this.
+		// validator 参考： https://github.com/go-playground/validator
+		if _, ok := err.(*validator.InvalidValidationError); ok {
+			log.Errorf("bind err. InvalidValidationError: %s", err.Error())
+			if retErr {
+				return false, err.Error()
+			} else {
+				return false, ""
+			}
+		}
+
+		errs, ok := err.(validator.ValidationErrors)
+		if ok {
+			for _, err := range errs {
+				log.Errorf("bind err. ValidationError. StructField: %s, Tag: %s %s, Type: %+v, Value: %+v", err.StructNamespace(), err.ActualTag(), err.Param(), err.Type(), err.Value())
+			}
+		} else {
+			log.Errorf("bind err. Unknown Err: %s", err.Error())
+		}
+
+		if retErr {
+			return false, err.Error()
+		} else {
+			return false, ""
+		}
+	}
+
+	return true, ""
+}
