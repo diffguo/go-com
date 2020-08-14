@@ -21,6 +21,6 @@ func Adday(input *time.Time, dayNum int) {
 	input.Add(d)
 }
 
-func EndTimeOfTheMonth(in time.Time) time.Time {
-	return time.Date(in.Year(), in.Month()+1, 0, 0, 0, 0, 0, in.Local())
+func EndDayOfTheMonth(in time.Time) time.Time {
+	return time.Date(in.Year(), in.Month()+1, 0, 0, 0, 0, 0, in.Location())
 }
