@@ -20,3 +20,7 @@ func Adday(input *time.Time, dayNum int) {
 	d, _ := time.ParseDuration(fmt.Sprintf("%dh", 24*dayNum))
 	input.Add(d)
 }
+
+func EndTimeOfTheMonth(in time.Time) time.Time {
+	return time.Date(in.Year(), in.Month()+1, 0, 0, 0, 0, 0, in.Local())
+}
