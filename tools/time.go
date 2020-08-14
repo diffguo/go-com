@@ -16,7 +16,7 @@ func DateFromTime(input *time.Time) time.Time {
 	return time.Date(input.Year(), input.Month(), input.Day(), 0, 0, 0, 0, time.Local)
 }
 
-func Adday(input *time.Time, dayNum int) {
+func AddDateByDayNum(input *time.Time, dayNum int) {
 	d, _ := time.ParseDuration(fmt.Sprintf("%dh", 24*dayNum))
 	input.Add(d)
 }
