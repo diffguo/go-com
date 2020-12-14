@@ -9,6 +9,7 @@ import (
 	"github.com/diffguo/gocom/log"
 	"math"
 	mrand "math/rand"
+	"strconv"
 	"time"
 )
 
@@ -92,4 +93,12 @@ func Base64Decode(input string) string {
 	}
 
 	return string(buf)
+}
+
+func Int64ToStr(i int64) string {
+	return strconv.FormatInt(i,10)
+}
+
+func StrToInt64(str string) (int64, error) {
+	return strconv.ParseInt(str, 10, 64)
 }

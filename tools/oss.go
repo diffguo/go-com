@@ -62,7 +62,7 @@ func (bucket *OssBucket) UploadToOss(resourcePath string, contentType string, re
 
 	err = bucket.bucket.PutObjectWithURL(signedURL, reader, options...)
 	if err != nil {
-		log.Errorf("upload house res err: %s", err.Error())
+		log.Errorf("upload res err: %s", err.Error())
 		return false
 	}
 
@@ -72,7 +72,7 @@ func (bucket *OssBucket) UploadToOss(resourcePath string, contentType string, re
 func (bucket *OssBucket) DeleteOssRes(resourcePath string) bool {
 	err := bucket.bucket.DeleteObject(resourcePath)
 	if err != nil {
-		log.Errorf("delete house res err: %s", err.Error())
+		log.Errorf("delete res err: %s", err.Error())
 		return false
 	}
 
