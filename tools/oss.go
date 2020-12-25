@@ -140,7 +140,7 @@ type OssOption struct {
 }
 
 func (bucket *OssBucket) SetOption(resourcePath string, option *OssOption) bool {
-	options := []oss.Option{}
+	var options []oss.Option
 	if option.Origin != "" {
 		options = append(options, oss.Origin(option.Origin))
 	}
@@ -151,7 +151,9 @@ func (bucket *OssBucket) SetOption(resourcePath string, option *OssOption) bool 
 		options = append(options, oss.CacheControl(option.ClientCache))
 	}
 
-	_, err := bucket.bucket.OptionsMethod(resourcePath, options...)
+	options = append(options, oss.ACReqMethod("POST"))
+
+	err := bucket.bucket.SetObjectMeta(resourcePath, options...)
 	if err != nil {
 		log.Errorf("OptionsMethod res err: %s", err.Error())
 		return false
