@@ -135,42 +135,36 @@ func (bucket *OssBucket) GetPolicyToken(tokenExpireTime int64) string {
 
 // 客户端直传后，OSS的回调函数中调用该函数进行参数验证。这里都把返回值写入了http.ResponseWriter中
 func VerifyCallback(w http.ResponseWriter, r *http.Request) bool {
-	if r.Method == "POST" {
-		log.Infof("Handle Oss VerifyCallback Request ... ")
+	log.Infof("Handle Oss VerifyCallback Request ... ")
 
-		// Get PublicKey bytes
-		bytePublicKey, err := getPublicKey(r)
-		if err != nil {
-			responseOSSFailed(w)
-			return false
-		}
-
-		// Get Authorization bytes : decode from Base64String
-		byteAuthorization, err := getAuthorization(r)
-		if err != nil {
-			responseOSSFailed(w)
-			return false
-		}
-
-		// Get MD5 bytes from Newly Constructed Authorization String.
-		byteMD5, err := getMD5FromNewAuthString(r)
-		if err != nil {
-			responseOSSFailed(w)
-			return false
-		}
-
-		// verifySignature and response to client
-		if verifySignature(bytePublicKey, byteMD5, byteAuthorization) {
-			// do something you want according to callback_body ...
-			responseOSSSuccess(w) // response OK : 200
-			return true
-		} else {
-			responseOSSFailed(w) // response FAILED : 400
-			return false
-		}
+	// Get PublicKey bytes
+	bytePublicKey, err := getPublicKey(r)
+	if err != nil {
+		responseOSSFailed(w)
+		return false
 	}
 
-	log.Error("oss callback must be Post Request ... ")
-	responseOSSFailed(w)
-	return false
+	// Get Authorization bytes : decode from Base64String
+	byteAuthorization, err := getAuthorization(r)
+	if err != nil {
+		responseOSSFailed(w)
+		return false
+	}
+
+	// Get MD5 bytes from Newly Constructed Authorization String.
+	byteMD5, err := getMD5FromNewAuthString(r)
+	if err != nil {
+		responseOSSFailed(w)
+		return false
+	}
+
+	// verifySignature and response to client
+	if verifySignature(bytePublicKey, byteMD5, byteAuthorization) {
+		// do something you want according to callback_body ...
+		responseOSSSuccess(w) // response OK : 200
+		return true
+	} else {
+		responseOSSFailed(w) // response FAILED : 400
+		return false
+	}
 }

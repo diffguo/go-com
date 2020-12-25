@@ -9,6 +9,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"github.com/diffguo/gocom/log"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -47,24 +48,24 @@ func getPublicKey(r *http.Request) ([]byte, error) {
 	// get PublicKey URL
 	publicKeyURLBase64 := r.Header.Get("x-oss-pub-key-url")
 	if publicKeyURLBase64 == "" {
-		fmt.Println("GetPublicKey from Request header failed :  No x-oss-pub-key-url field. ")
+		log.Error("GetPublicKey from Request header failed :  No x-oss-pub-key-url field. ")
 		return bytePublicKey, errors.New("no x-oss-pub-key-url field in Request header ")
 	}
 	publicKeyURL, _ := base64.StdEncoding.DecodeString(publicKeyURLBase64)
-	// fmt.Printf("publicKeyURL={%s}\n", publicKeyURL)
+	log.Infof("publicKeyURL={%s}", publicKeyURL)
 	// get PublicKey Content from URL
 	responsePublicKeyURL, err := http.Get(string(publicKeyURL))
 	if err != nil {
-		fmt.Printf("Get PublicKey Content from URL failed : %s \n", err.Error())
+		log.Errorf("Get PublicKey Content from URL failed : %s ", err.Error())
 		return bytePublicKey, err
 	}
 	bytePublicKey, err = ioutil.ReadAll(responsePublicKeyURL.Body)
 	if err != nil {
-		fmt.Printf("Read PublicKey Content from URL failed : %s \n", err.Error())
+		log.Errorf("Read PublicKey Content from URL failed : %s ", err.Error())
 		return bytePublicKey, err
 	}
 	defer responsePublicKeyURL.Body.Close()
-	// fmt.Printf("publicKey={%s}\n", bytePublicKey)
+	log.Infof("publicKey={%s}", bytePublicKey)
 	return bytePublicKey, nil
 }
 
@@ -74,7 +75,7 @@ func getAuthorization(r *http.Request) ([]byte, error) {
 	// Get Authorization bytes : decode from Base64String
 	strAuthorizationBase64 := r.Header.Get("authorization")
 	if strAuthorizationBase64 == "" {
-		fmt.Println("Failed to get authorization field from request header. ")
+		log.Error("Failed to get authorization field from request header. ")
 		return byteAuthorization, errors.New("no authorization field in Request header")
 	}
 	byteAuthorization, _ = base64.StdEncoding.DecodeString(strAuthorizationBase64)
@@ -89,14 +90,14 @@ func getMD5FromNewAuthString(r *http.Request) ([]byte, error) {
 	bodyContent, err := ioutil.ReadAll(r.Body)
 	r.Body.Close()
 	if err != nil {
-		fmt.Printf("Read Request Body failed : %s \n", err.Error())
+		log.Errorf("Read Request Body failed : %s ", err.Error())
 		return byteMD5, err
 	}
 	strCallbackBody := string(bodyContent)
-	// fmt.Printf("r.URL.RawPath={%s}, r.URL.Query()={%s}, strCallbackBody={%s}\n", r.URL.RawPath, r.URL.Query(), strCallbackBody)
+	log.Infof("r.URL.RawPath={%s}, r.URL.Query()={%s}, strCallbackBody={%s}", r.URL.RawPath, r.URL.Query(), strCallbackBody)
 	strURLPathDecode, errUnescape := unescapePath(r.URL.Path, encodePathSegment) //url.PathUnescape(r.URL.Path) for Golang v1.8.2+
 	if errUnescape != nil {
-		fmt.Printf("url.PathUnescape failed : URL.Path=%s, error=%s \n", r.URL.Path, err.Error())
+		log.Errorf("url.PathUnescape failed : URL.Path=%s, error=%s", r.URL.Path, err.Error())
 		return byteMD5, errUnescape
 	}
 
@@ -127,26 +128,30 @@ func getMD5FromNewAuthString(r *http.Request) ([]byte, error) {
 func verifySignature(bytePublicKey []byte, byteMd5 []byte, authorization []byte) bool {
 	pubBlock, _ := pem.Decode(bytePublicKey)
 	if pubBlock == nil {
-		fmt.Printf("Failed to parse PEM block containing the public key")
+		log.Error("Failed to parse PEM block containing the public key")
 		return false
 	}
 	pubInterface, err := x509.ParsePKIXPublicKey(pubBlock.Bytes)
 	if (pubInterface == nil) || (err != nil) {
-		fmt.Printf("x509.ParsePKIXPublicKey(publicKey) failed : %s \n", err.Error())
+		if err != nil {
+			log.Errorf("x509.ParsePKIXPublicKey(publicKey) failed : %s", err.Error())
+		} else {
+			log.Errorf("x509.ParsePKIXPublicKey(publicKey) failed")
+		}
 		return false
 	}
 	pub := pubInterface.(*rsa.PublicKey)
 
 	errorVerifyPKCS1v15 := rsa.VerifyPKCS1v15(pub, crypto.MD5, byteMd5, authorization)
 	if errorVerifyPKCS1v15 != nil {
-		fmt.Printf("\nSignature Verification is Failed : %s \n", errorVerifyPKCS1v15.Error())
+		log.Errorf("Signature Verification is Failed : %s", errorVerifyPKCS1v15.Error())
 		//printByteArray(byteMd5, "AuthMd5(fromNewAuthString)")
 		//printByteArray(bytePublicKey, "PublicKeyBase64")
 		//printByteArray(authorization, "AuthorizationFromRequest")
 		return false
 	}
 
-	fmt.Printf("\nSignature Verification is Successful. \n")
+	log.Info("Signature Verification is Successful")
 	return true
 }
 
@@ -157,13 +162,12 @@ func responseOSSSuccess(w http.ResponseWriter) {
 	w.Header().Set("Content-Length", strconv.Itoa(len(strResponseBody)))
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(strResponseBody))
-	fmt.Printf("\nPost Response : 200 OK . \n")
 }
 
 // responseFailed : Response 400 to client
 func responseOSSFailed(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusBadRequest)
-	fmt.Printf("\nPost Response : 400 BAD . \n")
+	log.Error("Post Response : 400 BAD")
 }
 
 type EscapeError string
