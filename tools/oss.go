@@ -136,23 +136,25 @@ func (bucket *OssBucket) GetPolicyToken(tokenExpireTime int64) string {
 type OssOption struct {
 	ContentType string
 	ClientCache string /*max-age=300*/
+	Origin      string
 }
 
 func (bucket *OssBucket) SetOption(resourcePath string, option *OssOption) bool {
+	options := []oss.Option{}
+	if option.Origin != "" {
+		options = append(options, oss.Origin(option.Origin))
+	}
 	if option.ContentType != "" {
-		_, err := bucket.bucket.OptionsMethod(resourcePath, oss.ContentType(option.ContentType))
-		if err != nil {
-			log.Errorf("OptionsMethod res err: %s", err.Error())
-			return false
-		}
+		options = append(options, oss.ContentType(option.ContentType))
+	}
+	if option.ClientCache != "" {
+		options = append(options, oss.CacheControl(option.ClientCache))
 	}
 
-	if option.ClientCache != "" {
-		_, err := bucket.bucket.OptionsMethod(resourcePath, oss.CacheControl(option.ClientCache))
-		if err != nil {
-			log.Errorf("OptionsMethod res err: %s", err.Error())
-			return false
-		}
+	_, err := bucket.bucket.OptionsMethod(resourcePath, options...)
+	if err != nil {
+		log.Errorf("OptionsMethod res err: %s", err.Error())
+		return false
 	}
 
 	return true
