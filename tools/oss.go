@@ -133,6 +133,31 @@ func (bucket *OssBucket) GetPolicyToken(tokenExpireTime int64) string {
 	return string(response)
 }
 
+type OssOption struct {
+	ContentType string
+	ClientCache string /*max-age=300*/
+}
+
+func (bucket *OssBucket) SetOption(resourcePath string, option *OssOption) bool {
+	if option.ContentType != "" {
+		_, err := bucket.bucket.OptionsMethod(resourcePath, oss.ContentType(option.ContentType))
+		if err != nil {
+			log.Errorf("OptionsMethod res err: %s", err.Error())
+			return false
+		}
+	}
+
+	if option.ClientCache != "" {
+		_, err := bucket.bucket.OptionsMethod(resourcePath, oss.CacheControl(option.ClientCache))
+		if err != nil {
+			log.Errorf("OptionsMethod res err: %s", err.Error())
+			return false
+		}
+	}
+
+	return true
+}
+
 // 客户端直传后，OSS的回调函数中调用该函数进行参数验证。这里都把返回值写入了http.ResponseWriter中
 func VerifyCallback(w http.ResponseWriter, r *http.Request) bool {
 	log.Infof("Handle Oss VerifyCallback Request ... ")
