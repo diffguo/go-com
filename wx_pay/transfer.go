@@ -76,7 +76,7 @@ func WXTransfer(amount int, openid, tradeNo, desc, createIP string) (rsp WeiXinT
 		return rsp, err
 	}
 	if rsp.PaymentNo == "" {
-		log.Errorf("PaymentNo is empty. tradeNo: %s, rs: %s", tradeNo, rs)
+		log.ErrorF("PaymentNo is empty. tradeNo: %s, rs: %s", tradeNo, rs)
 	}
 
 	return rsp, nil
@@ -95,7 +95,7 @@ func GetTransferInfo(tradeNO string) {
 
 	rs, err := formatMapToXMLStr(params)
 	if err != nil {
-		log.Errorf("formatMapToXMLStr err: %s", err.Error())
+		log.ErrorF("formatMapToXMLStr err: %s", err.Error())
 		return
 	}
 
@@ -107,10 +107,10 @@ func GetTransferInfo(tradeNO string) {
 	// 一旦发出请求，如果没有得到明确的失败，都认为是三方不能确认，由脚本重新发起
 	rs, err = postTlsUrl(client, WX_TRANSFERSinfo_URL, rs)
 	if err != nil {
-		log.Errorf("GetTransferInfo err: %s", err.Error())
+		log.ErrorF("GetTransferInfo err: %s", err.Error())
 		return
 	} else {
-		log.Debugf("GetTransferInfo rsp: %s", rs)
+		log.DebugF("GetTransferInfo rsp: %s", rs)
 	}
 
 	// 结果解析
@@ -122,12 +122,12 @@ func GetTransferInfo(tradeNO string) {
 
 	if rsp.ResultCode == "SUCCESS" && rsp.ReturnCode == "SUCCESS" {
 		if rsp.Status == "SUCCESS" {
-			log.Debugf("GetTransferInfo rsp: %s", rsp.Status)
+			log.DebugF("GetTransferInfo rsp: %s", rsp.Status)
 		} else {
-			log.Errorf("GetTransferInfo rsp: %s", rsp.Reason)
+			log.ErrorF("GetTransferInfo rsp: %s", rsp.Reason)
 		}
 	} else {
-		log.Errorf("GetTransferInfo rsp: %s", rsp.ReturnMsg)
+		log.ErrorF("GetTransferInfo rsp: %s", rsp.ReturnMsg)
 	}
 }
 

@@ -13,6 +13,8 @@ import (
 
 // 按天进行日志切割
 
+var GDailyLog *DailyLog
+
 type DailyLog struct {
 	LastCheckTime time.Time
 	LogLevel      int
@@ -58,6 +60,11 @@ func InitDailyLog(logDir string, logFile string, logStrLevel string) (*DailyLog,
 
 	dailyLog.LastCheckTime = ff.ModTime()
 	dailyLog.rotate()
+
+	if GDailyLog == nil {
+		GDailyLog = &dailyLog
+	}
+
 	return &dailyLog, nil
 }
 
@@ -96,7 +103,7 @@ func (dLog *DailyLog) Debug(v ...interface{}) {
 	}
 }
 
-func (dLog *DailyLog) Debugf(format string, args ...interface{}) {
+func (dLog *DailyLog) DebugF(format string, args ...interface{}) {
 	if dLog.LogLevel == LogLevelDebug {
 		msg := fmt.Sprintf(format, args...)
 		out := fmt.Sprintf("[DEBUG][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), msg)
@@ -115,7 +122,7 @@ func (dLog *DailyLog) Info(v ...interface{}) {
 	}
 }
 
-func (dLog *DailyLog) Infof(format string, args ...interface{}) {
+func (dLog *DailyLog) InfoF(format string, args ...interface{}) {
 	if dLog.LogLevel >= LogLevelInfo {
 		msg := fmt.Sprintf(format, args...)
 		out := fmt.Sprintf("[INFO][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), msg)
@@ -134,7 +141,7 @@ func (dLog *DailyLog) Warn(v ...interface{}) {
 	}
 }
 
-func (dLog *DailyLog) Warnf(format string, args ...interface{}) {
+func (dLog *DailyLog) WarnF(format string, args ...interface{}) {
 	if dLog.LogLevel >= LogLevelWarn {
 		msg := fmt.Sprintf(format, args...)
 		out := fmt.Sprintf("[WARN][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), msg)
@@ -153,7 +160,7 @@ func (dLog *DailyLog) Error(v ...interface{}) {
 	}
 }
 
-func (dLog *DailyLog) Errorf(format string, args ...interface{}) {
+func (dLog *DailyLog) ErrorF(format string, args ...interface{}) {
 	if dLog.LogLevel >= LogLevelError {
 		msg := fmt.Sprintf(format, args...)
 		out := fmt.Sprintf("[ERRO][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), msg)

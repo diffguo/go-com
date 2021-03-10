@@ -30,9 +30,9 @@ func GinLogger(threshold time.Duration) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		trace_id.SaveTraceId(c.GetHeader(trace_id.TraceIDName))
 
-		if log.GLog.LogLevel == log.LogLevelDebug {
+		if log.GSizeLog.LogLevel == log.LogLevelDebug {
 			if c.Request.Method == http.MethodGet {
-				log.Debugf("[GIN DEBUG] %s %s URL: %s Header: %+v", c.Request.Method, c.Request.Proto,
+				log.DebugF("[GIN DEBUG] %s %s URL: %s Header: %+v", c.Request.Method, c.Request.Proto,
 					c.Request.URL.String(), c.Request.Header)
 			} else {
 				contentType := c.ContentType()
@@ -44,18 +44,18 @@ func GinLogger(threshold time.Duration) gin.HandlerFunc {
 
 					if body != nil {
 						if contentType == gin.MIMEMultipartPOSTForm || c.Request.ContentLength > 512 {
-							log.Debugf("[GIN DEBUG] %s %s URL: %s Header: %+v BodyLen: %d", c.Request.Method, c.Request.Proto,
+							log.DebugF("[GIN DEBUG] %s %s URL: %s Header: %+v BodyLen: %d", c.Request.Method, c.Request.Proto,
 								c.Request.URL.String(), c.Request.Header, c.Request.ContentLength)
 						} else {
-							log.Debugf("[GIN DEBUG] %s %s URL: %s Header: %+v Body: %s", c.Request.Method, c.Request.Proto,
+							log.DebugF("[GIN DEBUG] %s %s URL: %s Header: %+v Body: %s", c.Request.Method, c.Request.Proto,
 								c.Request.URL.String(), c.Request.Header, string(body))
 						}
 					} else {
-						log.Debugf("[GIN DEBUG] %s %s URL: %s Header: %+v. Body err", c.Request.Method, c.Request.Proto,
+						log.DebugF("[GIN DEBUG] %s %s URL: %s Header: %+v. Body err", c.Request.Method, c.Request.Proto,
 							c.Request.URL.String(), c.Request.Header)
 					}
 				} else {
-					log.Debugf("[GIN DEBUG] %s %s URL: %s Header: %+v", c.Request.Method, c.Request.Proto,
+					log.DebugF("[GIN DEBUG] %s %s URL: %s Header: %+v", c.Request.Method, c.Request.Proto,
 						c.Request.URL.String(), c.Request.Header)
 				}
 			}
@@ -79,7 +79,7 @@ func GinLogger(threshold time.Duration) gin.HandlerFunc {
 		userId := c.Request.Header.Get("selfUserId")
 
 		requestData := getRequestData(c)
-		log.Infof("[GIN] %s%s%s %s%s %s%d%s %.03f [%s] [user_id:%s] %s",
+		log.InfoF("[GIN] %s%s%s %s%s %s%d%s %.03f [%s] [user_id:%s] %s",
 			methodColor, method, log.Reset,
 			c.Request.Host, requestData,
 			statusColor, statusCode, log.Reset,
@@ -89,7 +89,7 @@ func GinLogger(threshold time.Duration) gin.HandlerFunc {
 			c.Errors.String())
 
 		if latency > threshold {
-			log.Warnf("[GIN SLOW] %s%s%s %s%s %s%d%s %.03f [%s] [user_id:%s] startAt: %s endAt: %s",
+			log.WarnF("[GIN SLOW] %s%s%s %s%s %s%d%s %.03f [%s] [user_id:%s] startAt: %s endAt: %s",
 				methodColor, method, log.Reset,
 				c.Request.Host, requestData,
 				statusColor, statusCode, log.Reset,
@@ -177,7 +177,7 @@ func CheckAuth() gin.HandlerFunc {
 
 		ua := c.GetHeader("Useragent")
 		if ua == "" {
-			log.Warnf("No UserAgent in the req: %+v", c.Request.Header)
+			log.WarnF("No UserAgent in the req: %+v", c.Request.Header)
 			SendFailResponse(c, http.StatusUnauthorized, "No UserAgent in the req")
 			c.Abort()
 			return
@@ -186,7 +186,7 @@ func CheckAuth() gin.HandlerFunc {
 		var userAgent UserAgent
 		err := json.Unmarshal([]byte(ua), &userAgent)
 		if err != nil {
-			log.Errorf("Unmarshal UserAgent Fail: %s %s", ua, err.Error())
+			log.ErrorF("Unmarshal UserAgent Fail: %s %s", ua, err.Error())
 			SendFailResponse(c, http.StatusUnauthorized, "Error UserAgent")
 			c.Abort()
 			return
@@ -195,7 +195,7 @@ func CheckAuth() gin.HandlerFunc {
 		authToken := c.GetHeader("Authorization")
 		tokenPlaintext, err := AuthAes.Decrypt(authToken)
 		if err != nil {
-			log.Errorf("Decrypt Authorization error : %s %s", authToken, err.Error())
+			log.ErrorF("Decrypt Authorization error : %s %s", authToken, err.Error())
 			SendFailResponse(c, http.StatusUnauthorized, "Wrong Authorization")
 			c.Abort()
 			return
@@ -203,14 +203,14 @@ func CheckAuth() gin.HandlerFunc {
 
 		items := strings.Split(tokenPlaintext, "|")
 		if len(items) != 5 {
-			log.Errorf("Wrong1 Authorization: %s", tokenPlaintext)
+			log.ErrorF("Wrong1 Authorization: %s", tokenPlaintext)
 			SendFailResponse(c, http.StatusUnauthorized, "Wrong1 Authorization")
 			c.Abort()
 			return
 		}
 
 		if items[0] != userAgent.AppVersion || items[1] != userAgent.MobileSystem || items[2] != userAgent.MobileDeviceBrand {
-			log.Errorf("Wrong2 Authorization: %+v", userAgent)
+			log.ErrorF("Wrong2 Authorization: %+v", userAgent)
 			SendFailResponse(c, http.StatusUnauthorized, "Wrong2 Authorization")
 			c.Abort()
 			return
@@ -227,7 +227,7 @@ func CheckAuth() gin.HandlerFunc {
 		tokenTime := time.Unix(timeStamp, 0)
 		if tokenTime.Add(time.Duration(time.Hour * 6)).Before(time.Now()) {
 			SendFailResponse(c, http.StatusUnauthorized, "Wrong Authorization, timeout")
-			log.Infof("token timeout. token time: %d", timeStamp)
+			log.InfoF("token timeout. token time: %d", timeStamp)
 			c.Abort()
 			return
 		}
@@ -242,7 +242,7 @@ func CheckAuth() gin.HandlerFunc {
 
 		err = GenAuth(c, userId)
 		if err != nil {
-			log.Errorf("gen new auth err: %s", err.Error())
+			log.ErrorF("gen new auth err: %s", err.Error())
 		}
 
 		c.Request.Header.Set("selfUserId", items[3])
@@ -300,7 +300,7 @@ func GenAuth(c *gin.Context, userId int64) error {
 
 func ShowAllRawBody(c *gin.Context) {
 	data, _ := ioutil.ReadAll(c.Request.Body)
-	log.Infof("Raw Http Body: %s", string(data))
+	log.InfoF("Raw Http Body: %s", string(data))
 	c.Request.Body = ioutil.NopCloser(bytes.NewReader(data))
 }
 
@@ -332,17 +332,17 @@ func Bind(c *gin.Context, obj interface{}) bool {
 		// value most including myself do not usually have code like this.
 		// validator 参考： https://github.com/go-playground/validator
 		if _, ok := err.(*validator.InvalidValidationError); ok {
-			log.Errorf("bind err. InvalidValidationError: %s", err.Error())
+			log.ErrorF("bind err. InvalidValidationError: %s", err.Error())
 			return false
 		}
 
 		errs, ok := err.(validator.ValidationErrors)
 		if ok {
 			for _, err := range errs {
-				log.Errorf("bind err. ValidationError. StructField: %s, Tag: %s %s, Type: %+v, Value: %+v", err.StructNamespace(), err.ActualTag(), err.Param(), err.Type(), err.Value())
+				log.ErrorF("bind err. ValidationError. StructField: %s, Tag: %s %s, Type: %+v, Value: %+v", err.StructNamespace(), err.ActualTag(), err.Param(), err.Type(), err.Value())
 			}
 		} else {
-			log.Errorf("bind err. Unknown Err: %s", err.Error())
+			log.ErrorF("bind err. Unknown Err: %s", err.Error())
 		}
 
 		return false
@@ -354,7 +354,7 @@ func Bind(c *gin.Context, obj interface{}) bool {
 // 如果绑定失败，则返回错误描述
 func Bind2(c *gin.Context, obj interface{}) (bool, string) {
 	retErr := false
-	if log.GLog != nil && (log.GLog.LogLevel == log.LogLevelDebug) {
+	if log.GSizeLog != nil && (log.GSizeLog.LogLevel == log.LogLevelDebug) {
 		retErr = true
 	}
 
@@ -365,7 +365,7 @@ func Bind2(c *gin.Context, obj interface{}) (bool, string) {
 		// value most including myself do not usually have code like this.
 		// validator 参考： https://github.com/go-playground/validator
 		if _, ok := err.(*validator.InvalidValidationError); ok {
-			log.Errorf("bind err. InvalidValidationError: %s", err.Error())
+			log.ErrorF("bind err. InvalidValidationError: %s", err.Error())
 			if retErr {
 				return false, err.Error()
 			} else {
@@ -376,10 +376,10 @@ func Bind2(c *gin.Context, obj interface{}) (bool, string) {
 		errs, ok := err.(validator.ValidationErrors)
 		if ok {
 			for _, err := range errs {
-				log.Errorf("bind err. ValidationError. StructField: %s, Tag: %s %s, Type: %+v, Value: %+v", err.StructNamespace(), err.ActualTag(), err.Param(), err.Type(), err.Value())
+				log.ErrorF("bind err. ValidationError. StructField: %s, Tag: %s %s, Type: %+v, Value: %+v", err.StructNamespace(), err.ActualTag(), err.Param(), err.Type(), err.Value())
 			}
 		} else {
-			log.Errorf("bind err. Unknown Err: %s", err.Error())
+			log.ErrorF("bind err. Unknown Err: %s", err.Error())
 		}
 
 		if retErr {

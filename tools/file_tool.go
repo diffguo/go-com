@@ -12,7 +12,7 @@ func LoadFile(fileFullPath string) []byte {
 
 	f, err := ioutil.ReadFile(fileFullPath)
 	if err != nil {
-		log.Errorf("ReadFile err: %s", err.Error())
+		log.ErrorF("ReadFile err: %s", err.Error())
 		return nil
 	}
 

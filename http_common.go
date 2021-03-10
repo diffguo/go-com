@@ -54,7 +54,7 @@ func _doHttpRequest(method string, reqUrl string, headers map[string]string, bod
 	client := http.Client{}
 	response, err := client.Do(req)
 	if nil != err {
-		log.Errorf("send request err: %v", err)
+		log.ErrorF("send request err: %v", err)
 		return http.StatusNotFound, nil, err
 	}
 
@@ -69,18 +69,18 @@ func _doHttpRequest(method string, reqUrl string, headers map[string]string, bod
 }
 
 func HttpForward(w http.ResponseWriter, r *http.Request, forwardUrl string) error {
-	log.Debugf("HttpForward url: %+v", r.URL)
+	log.DebugF("HttpForward url: %+v", r.URL)
 
 	cli := &http.Client{}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Errorf("HttpForward read w err: %s", err.Error())
+		log.ErrorF("HttpForward read w err: %s", err.Error())
 		return err
 	}
 
 	req, err := http.NewRequest(r.Method, forwardUrl, strings.NewReader(string(body)))
 	if err != nil {
-		log.Errorf("HttpForward http.NewRequest err: %s", err.Error())
+		log.ErrorF("HttpForward http.NewRequest err: %s", err.Error())
 		return err
 	}
 
@@ -90,7 +90,7 @@ func HttpForward(w http.ResponseWriter, r *http.Request, forwardUrl string) erro
 
 	res, err := cli.Do(req)
 	if err != nil {
-		log.Errorf("HttpForward Do Request err: %s", err.Error())
+		log.ErrorF("HttpForward Do Request err: %s", err.Error())
 		return err
 	}
 
@@ -135,7 +135,7 @@ func HttpPostJson(addr string, urlParams url.Values, headers map[string]string, 
 	cli := &http.Client{}
 	response, err := cli.Do(request)
 	if nil != err {
-		log.Errorf("httpRequest: Do request (%+v) error:%v", request, err)
+		log.ErrorF("httpRequest: Do request (%+v) error:%v", request, err)
 		return nil, 0, err
 	}
 
@@ -145,7 +145,7 @@ func HttpPostJson(addr string, urlParams url.Values, headers map[string]string, 
 
 	data, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		log.Errorf("httpRequest: read response error:%v", err)
+		log.ErrorF("httpRequest: read response error:%v", err)
 		return nil, 0, err
 	}
 
@@ -179,7 +179,7 @@ func HttpFormRequest(method, addr string, urlParams url.Values, headers map[stri
 	cli := &http.Client{}
 	response, err := cli.Do(request)
 	if nil != err {
-		log.Errorf("httpRequest: Do request (%+v) error:%v", request, err)
+		log.ErrorF("httpRequest: Do request (%+v) error:%v", request, err)
 		return nil, 0, err
 	}
 
@@ -189,7 +189,7 @@ func HttpFormRequest(method, addr string, urlParams url.Values, headers map[stri
 
 	data, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		log.Errorf("httpRequest: read response error:%v", err)
+		log.ErrorF("httpRequest: read response error:%v", err)
 		return nil, 0, err
 	}
 

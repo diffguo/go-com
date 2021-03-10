@@ -31,13 +31,13 @@ type OssBucket struct {
 func InitOssBucket(endPoint, accessKeyID, accessKeySecret, bucketName string, clientCacheTime int /*单位秒*/, callbackUrl, uploadDir string, tokenExpireTime int64) (*OssBucket, error) {
 	client, err := oss.New(endPoint, accessKeyID, accessKeySecret)
 	if err != nil {
-		log.Errorf("init oss client error: %s", err.Error())
+		log.ErrorF("init oss client error: %s", err.Error())
 		return nil, err
 	}
 
 	bucket, err := client.Bucket(bucketName)
 	if err != nil {
-		log.Errorf("init oss bucket error: %s", err.Error())
+		log.ErrorF("init oss bucket error: %s", err.Error())
 		return nil, err
 	}
 
@@ -55,14 +55,14 @@ func (bucket *OssBucket) UploadToOss(resourcePath string, contentType string, re
 	signedURL, err := bucket.bucket.SignURL(resourcePath, oss.HTTPPut, 60, options...)
 	if err != nil {
 		if err != nil {
-			log.Errorf("init oss sign url error: %s", err.Error())
+			log.ErrorF("init oss sign url error: %s", err.Error())
 			return false
 		}
 	}
 
 	err = bucket.bucket.PutObjectWithURL(signedURL, reader, options...)
 	if err != nil {
-		log.Errorf("upload res err: %s", err.Error())
+		log.ErrorF("upload res err: %s", err.Error())
 		return false
 	}
 
@@ -72,7 +72,7 @@ func (bucket *OssBucket) UploadToOss(resourcePath string, contentType string, re
 func (bucket *OssBucket) DeleteOssRes(resourcePath string) bool {
 	err := bucket.bucket.DeleteObject(resourcePath)
 	if err != nil {
-		log.Errorf("delete res err: %s", err.Error())
+		log.ErrorF("delete res err: %s", err.Error())
 		return false
 	}
 
@@ -155,7 +155,7 @@ func (bucket *OssBucket) SetOption(resourcePath string, option *OssOption) bool 
 
 	err := bucket.bucket.SetObjectMeta(resourcePath, options...)
 	if err != nil {
-		log.Errorf("OptionsMethod res err: %s", err.Error())
+		log.ErrorF("OptionsMethod res err: %s", err.Error())
 		return false
 	}
 
@@ -164,7 +164,7 @@ func (bucket *OssBucket) SetOption(resourcePath string, option *OssOption) bool 
 
 // 客户端直传后，OSS的回调函数中调用该函数进行参数验证。这里都把返回值写入了http.ResponseWriter中
 func VerifyCallback(w http.ResponseWriter, r *http.Request) bool {
-	log.Infof("Handle Oss VerifyCallback Request ... ")
+	log.InfoF("Handle Oss VerifyCallback Request ... ")
 
 	// Get PublicKey bytes
 	bytePublicKey, err := getPublicKey(r)

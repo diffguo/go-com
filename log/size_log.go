@@ -11,69 +11,11 @@ import (
 	"time"
 )
 
-// 安文件大小进行日志切割
+// 按文件大小进行日志切割
 
-var (
-	green   = string([]byte{27, 91, 57, 55, 59, 52, 50, 109})
-	white   = string([]byte{27, 91, 57, 48, 59, 52, 55, 109})
-	yellow  = string([]byte{27, 91, 57, 55, 59, 52, 51, 109})
-	red     = string([]byte{27, 91, 57, 55, 59, 52, 49, 109})
-	blue    = string([]byte{27, 91, 57, 55, 59, 52, 52, 109})
-	magenta = string([]byte{27, 91, 57, 55, 59, 52, 53, 109})
-	cyan    = string([]byte{27, 91, 57, 55, 59, 52, 54, 109})
-	Reset   = string([]byte{27, 91, 48, 109})
-)
+var GSizeLog *SizeLog
 
-func ColorForStatus(code int) string {
-	switch {
-	case code >= 200 && code <= 299:
-		return green
-	case code >= 300 && code <= 399:
-		return white
-	case code >= 400 && code <= 499:
-		return yellow
-	default:
-		return red
-	}
-}
-
-func ColorForMethod(method string) string {
-	switch {
-	case method == "GET":
-		return blue
-	case method == "POST":
-		return cyan
-	case method == "PUT":
-		return yellow
-	case method == "DELETE":
-		return red
-	case method == "PATCH":
-		return green
-	case method == "HEAD":
-		return magenta
-	case method == "OPTIONS":
-		return white
-	default:
-		return Reset
-	}
-}
-
-func ColorForReset() string {
-	return Reset
-}
-
-const (
-	LogLevelError = 1 << iota
-	LogLevelWarn
-	LogLevelInfo
-	LogLevelDebug
-)
-
-var GLog *SimpleLog
-
-const PrefixHeadLen = 48
-
-type SimpleLog struct {
+type SizeLog struct {
 	LogLevel     int
 	LogMaxSize   int
 	LogCurSize   int
@@ -82,7 +24,7 @@ type SimpleLog struct {
 	Log          *log.Logger
 }
 
-func InitLog(logDir string, logFile string, logStrLevel string, LogMaxSize int) (*SimpleLog, error) {
+func InitSizeLog(logDir string, logFile string, logStrLevel string, LogMaxSize int) (*SizeLog, error) {
 	if LogMaxSize == 0 {
 		LogMaxSize = 524288000
 	}
@@ -93,61 +35,42 @@ func InitLog(logDir string, logFile string, logStrLevel string, LogMaxSize int) 
 		return nil, fmt.Errorf("wrong log level")
 	}
 
-	simpleLog := SimpleLog{LogMaxSize: LogMaxSize}
-	simpleLog.LogLevel = getLogLevel(logStrLevel)
-	if simpleLog.LogLevel == 0 {
+	sizeLog := SizeLog{LogMaxSize: LogMaxSize}
+	sizeLog.LogLevel = getLogLevel(logStrLevel)
+	if sizeLog.LogLevel == 0 {
 		return nil, fmt.Errorf("wrong log level: %s", logStrLevel)
 	}
 
-	simpleLog.FileFullName = logDir + "/" + logFile
+	sizeLog.FileFullName = logDir + "/" + logFile
 
 	var err error
-	simpleLog.PFile, err = os.OpenFile(simpleLog.FileFullName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	sizeLog.PFile, err = os.OpenFile(sizeLog.FileFullName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		return nil, err
 	}
 
-	simpleLog.Log = log.New(simpleLog.PFile, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
-	if GLog == nil {
-		GLog = &simpleLog
+	sizeLog.Log = log.New(sizeLog.PFile, "", log.Ldate|log.Lmicroseconds|log.Lshortfile)
+	if GSizeLog == nil {
+		GSizeLog = &sizeLog
 	}
 
-	ff, err := os.Stat(simpleLog.FileFullName)
+	ff, err := os.Stat(sizeLog.FileFullName)
 	if err != nil {
 		return nil, err
 	}
 
+	// 文件最大2G
 	if ff.Size() > math.MaxInt {
-		simpleLog.LogCurSize = math.MaxInt
+		sizeLog.LogCurSize = math.MaxInt
 	} else {
-		simpleLog.LogCurSize = int(ff.Size())
+		sizeLog.LogCurSize = int(ff.Size())
 	}
 
-	simpleLog.rotate()
-	return &simpleLog, nil
+	sizeLog.rotate()
+	return &sizeLog, nil
 }
 
-func getLogLevel(logStrLevel string) int {
-	if logStrLevel == "debug" {
-		return LogLevelDebug
-	}
-
-	if logStrLevel == "info" {
-		return LogLevelInfo
-	}
-
-	if logStrLevel == "warn" {
-		return LogLevelWarn
-	}
-
-	if logStrLevel == "error" {
-		return LogLevelError
-	}
-
-	return 0
-}
-
-func (slog *SimpleLog) rotate() {
+func (slog *SizeLog) rotate() {
 	if slog.LogCurSize >= slog.LogMaxSize {
 		err := slog.PFile.Close()
 		if err != nil {
@@ -172,7 +95,7 @@ func (slog *SimpleLog) rotate() {
 	}
 }
 
-func (slog *SimpleLog) Debug(v ...interface{}) {
+func (slog *SizeLog) Debug(v ...interface{}) {
 	if slog.LogLevel == LogLevelDebug {
 		out := fmt.Sprintf("[DEBUG][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), fmt.Sprint(v...))
 		slog.LogCurSize += PrefixHeadLen + len(out)
@@ -181,7 +104,7 @@ func (slog *SimpleLog) Debug(v ...interface{}) {
 	}
 }
 
-func (slog *SimpleLog) Debugf(format string, args ...interface{}) {
+func (slog *SizeLog) DebugF(format string, args ...interface{}) {
 	if slog.LogLevel == LogLevelDebug {
 		msg := fmt.Sprintf(format, args...)
 		out := fmt.Sprintf("[DEBUG][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), msg)
@@ -191,7 +114,7 @@ func (slog *SimpleLog) Debugf(format string, args ...interface{}) {
 	}
 }
 
-func (slog *SimpleLog) Info(v ...interface{}) {
+func (slog *SizeLog) Info(v ...interface{}) {
 	if slog.LogLevel >= LogLevelInfo {
 		out := fmt.Sprintf("[INFO][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), fmt.Sprint(v...))
 		slog.LogCurSize += PrefixHeadLen + len(out)
@@ -200,7 +123,7 @@ func (slog *SimpleLog) Info(v ...interface{}) {
 	}
 }
 
-func (slog *SimpleLog) Infof(format string, args ...interface{}) {
+func (slog *SizeLog) InfoF(format string, args ...interface{}) {
 	if slog.LogLevel >= LogLevelInfo {
 		msg := fmt.Sprintf(format, args...)
 		out := fmt.Sprintf("[INFO][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), msg)
@@ -210,7 +133,7 @@ func (slog *SimpleLog) Infof(format string, args ...interface{}) {
 	}
 }
 
-func (slog *SimpleLog) Warn(v ...interface{}) {
+func (slog *SizeLog) Warn(v ...interface{}) {
 	if slog.LogLevel >= LogLevelWarn {
 		out := fmt.Sprintf("[WARN][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), fmt.Sprint(v...))
 		slog.LogCurSize += PrefixHeadLen + len(out)
@@ -219,7 +142,7 @@ func (slog *SimpleLog) Warn(v ...interface{}) {
 	}
 }
 
-func (slog *SimpleLog) Warnf(format string, args ...interface{}) {
+func (slog *SizeLog) WarnF(format string, args ...interface{}) {
 	if slog.LogLevel >= LogLevelWarn {
 		msg := fmt.Sprintf(format, args...)
 		out := fmt.Sprintf("[WARN][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), msg)
@@ -229,7 +152,7 @@ func (slog *SimpleLog) Warnf(format string, args ...interface{}) {
 	}
 }
 
-func (slog *SimpleLog) Error(v ...interface{}) {
+func (slog *SizeLog) Error(v ...interface{}) {
 	if slog.LogLevel >= LogLevelError {
 		out := fmt.Sprintf("[ERRO][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), fmt.Sprint(v...))
 		slog.LogCurSize += PrefixHeadLen + len(out)
@@ -238,7 +161,7 @@ func (slog *SimpleLog) Error(v ...interface{}) {
 	}
 }
 
-func (slog *SimpleLog) Errorf(format string, args ...interface{}) {
+func (slog *SizeLog) ErrorF(format string, args ...interface{}) {
 	if slog.LogLevel >= LogLevelError {
 		msg := fmt.Sprintf(format, args...)
 		out := fmt.Sprintf("[ERRO][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), msg)
@@ -246,36 +169,4 @@ func (slog *SimpleLog) Errorf(format string, args ...interface{}) {
 		slog.Log.Output(3, out)
 		slog.rotate()
 	}
-}
-
-func Debug(v ...interface{}) {
-	GLog.Debug(v...)
-}
-
-func Debugf(format string, args ...interface{}) {
-	GLog.Debugf(format, args...)
-}
-
-func Info(v ...interface{}) {
-	GLog.Info(v...)
-}
-
-func Infof(format string, args ...interface{}) {
-	GLog.Infof(format, args...)
-}
-
-func Warn(v ...interface{}) {
-	GLog.Warn(v...)
-}
-
-func Warnf(format string, args ...interface{}) {
-	GLog.Warnf(format, args...)
-}
-
-func Error(v ...interface{}) {
-	GLog.Error(v...)
-}
-
-func Errorf(format string, args ...interface{}) {
-	GLog.Errorf(format, args...)
 }

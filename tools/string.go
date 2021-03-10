@@ -88,7 +88,7 @@ func Base64Decode(input string) string {
 	}
 
 	if err != nil {
-		log.Errorf("ase64.URLEncoding.Decode err: %s for: %s", err.Error(), input)
+		log.ErrorF("ase64.URLEncoding.Decode err: %s for: %s", err.Error(), input)
 		return ""
 	}
 

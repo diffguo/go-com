@@ -42,11 +42,11 @@ func InitWXPayClient(appId, mchId, apiKey, wxKey, wxCert string) *Client {
 
 // 用户下单
 func PlaceAnWXPayOrder(orderNo, orderBody string, totalFee int, clientIP, notifyURL, openID string) (*WXPayParams, error) {
-	log.Infof("PlaceAnWXPayOrder ExtOrderId: %s totalFee: %d, openID: %s orderBody: %s", orderNo, totalFee, totalFee, openID, orderBody)
+	log.InfoF("PlaceAnWXPayOrder ExtOrderId: %s totalFee: %d, openID: %s orderBody: %s", orderNo, totalFee, totalFee, openID, orderBody)
 
 	// 附着商户证书
 	if err := WXPayClient.WithCertBytes(WXPayClient.WXCert, WXPayClient.WXKey); err != nil {
-		log.Errorf("WithCertBytes Err: %s", err.Error())
+		log.ErrorF("WithCertBytes Err: %s", err.Error())
 		return nil, err
 	}
 
@@ -89,11 +89,11 @@ func PlaceAnWXPayOrder(orderNo, orderBody string, totalFee int, clientIP, notify
 
 // 申请退款
 func DoWXRefund(transactionID, outRefundNo string, totalFee, refundFee int, refundDesc string) error {
-	log.Infof("DoWXRefund WXOrderId: %s ExtOrderId: %s totalFee: %d, refundFee: %d refundDesc: %s", transactionID, outRefundNo, totalFee, refundFee, refundDesc)
+	log.InfoF("DoWXRefund WXOrderId: %s ExtOrderId: %s totalFee: %d, refundFee: %d refundDesc: %s", transactionID, outRefundNo, totalFee, refundFee, refundDesc)
 
 	// 附着商户证书
 	if err := WXPayClient.WithCertBytes(WXPayClient.WXCert, WXPayClient.WXKey); err != nil {
-		log.Errorf("WithCertBytes Err: %s", err.Error())
+		log.ErrorF("WithCertBytes Err: %s", err.Error())
 		return err
 	}
 
@@ -116,15 +116,15 @@ func DoWXRefund(transactionID, outRefundNo string, totalFee, refundFee int, refu
 		return err
 	}
 
-	log.Infof("DoWXRefund post rsp: %+v", ret)
+	log.InfoF("DoWXRefund post rsp: %+v", ret)
 
 	if ret.GetString("return_code") != "SUCCESS" {
-		log.Errorf("退款失败. ret: %+v, params: %+v", ret, params)
+		log.ErrorF("退款失败. ret: %+v, params: %+v", ret, params)
 		return fmt.Errorf(ret.GetString("return_msg"))
 	}
 
 	if ret.GetString("result_code") != "SUCCESS" {
-		log.Errorf("退款失败. ret: %+v, params: %+v", ret, params)
+		log.ErrorF("退款失败. ret: %+v, params: %+v", ret, params)
 		return fmt.Errorf(ret.GetString("err_code_des"))
 	}
 

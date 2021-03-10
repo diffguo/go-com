@@ -52,20 +52,20 @@ func getPublicKey(r *http.Request) ([]byte, error) {
 		return bytePublicKey, errors.New("no x-oss-pub-key-url field in Request header ")
 	}
 	publicKeyURL, _ := base64.StdEncoding.DecodeString(publicKeyURLBase64)
-	log.Infof("publicKeyURL={%s}", publicKeyURL)
+	log.InfoF("publicKeyURL={%s}", publicKeyURL)
 	// get PublicKey Content from URL
 	responsePublicKeyURL, err := http.Get(string(publicKeyURL))
 	if err != nil {
-		log.Errorf("Get PublicKey Content from URL failed : %s ", err.Error())
+		log.ErrorF("Get PublicKey Content from URL failed : %s ", err.Error())
 		return bytePublicKey, err
 	}
 	bytePublicKey, err = ioutil.ReadAll(responsePublicKeyURL.Body)
 	if err != nil {
-		log.Errorf("Read PublicKey Content from URL failed : %s ", err.Error())
+		log.ErrorF("Read PublicKey Content from URL failed : %s ", err.Error())
 		return bytePublicKey, err
 	}
 	defer responsePublicKeyURL.Body.Close()
-	log.Infof("publicKey={%s}", bytePublicKey)
+	log.InfoF("publicKey={%s}", bytePublicKey)
 	return bytePublicKey, nil
 }
 
@@ -90,14 +90,14 @@ func getMD5FromNewAuthString(r *http.Request) ([]byte, error) {
 	bodyContent, err := ioutil.ReadAll(r.Body)
 	r.Body.Close()
 	if err != nil {
-		log.Errorf("Read Request Body failed : %s ", err.Error())
+		log.ErrorF("Read Request Body failed : %s ", err.Error())
 		return byteMD5, err
 	}
 	strCallbackBody := string(bodyContent)
-	log.Infof("r.URL.RawPath={%s}, r.URL.Query()={%s}, strCallbackBody={%s}", r.URL.RawPath, r.URL.Query(), strCallbackBody)
+	log.InfoF("r.URL.RawPath={%s}, r.URL.Query()={%s}, strCallbackBody={%s}", r.URL.RawPath, r.URL.Query(), strCallbackBody)
 	strURLPathDecode, errUnescape := unescapePath(r.URL.Path, encodePathSegment) //url.PathUnescape(r.URL.Path) for Golang v1.8.2+
 	if errUnescape != nil {
-		log.Errorf("url.PathUnescape failed : URL.Path=%s, error=%s", r.URL.Path, err.Error())
+		log.ErrorF("url.PathUnescape failed : URL.Path=%s, error=%s", r.URL.Path, err.Error())
 		return byteMD5, errUnescape
 	}
 
@@ -134,9 +134,9 @@ func verifySignature(bytePublicKey []byte, byteMd5 []byte, authorization []byte)
 	pubInterface, err := x509.ParsePKIXPublicKey(pubBlock.Bytes)
 	if (pubInterface == nil) || (err != nil) {
 		if err != nil {
-			log.Errorf("x509.ParsePKIXPublicKey(publicKey) failed : %s", err.Error())
+			log.ErrorF("x509.ParsePKIXPublicKey(publicKey) failed : %s", err.Error())
 		} else {
-			log.Errorf("x509.ParsePKIXPublicKey(publicKey) failed")
+			log.ErrorF("x509.ParsePKIXPublicKey(publicKey) failed")
 		}
 		return false
 	}
@@ -144,7 +144,7 @@ func verifySignature(bytePublicKey []byte, byteMd5 []byte, authorization []byte)
 
 	errorVerifyPKCS1v15 := rsa.VerifyPKCS1v15(pub, crypto.MD5, byteMd5, authorization)
 	if errorVerifyPKCS1v15 != nil {
-		log.Errorf("Signature Verification is Failed : %s", errorVerifyPKCS1v15.Error())
+		log.ErrorF("Signature Verification is Failed : %s", errorVerifyPKCS1v15.Error())
 		//printByteArray(byteMd5, "AuthMd5(fromNewAuthString)")
 		//printByteArray(bytePublicKey, "PublicKeyBase64")
 		//printByteArray(authorization, "AuthorizationFromRequest")
