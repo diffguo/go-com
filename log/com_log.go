@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/chanxuehong/util/math"
 	"github.com/diffguo/gocom/goroutineid"
-	"github.com/diffguo/gocom/trace_id"
 	"log"
 	"os"
 	"strings"
@@ -144,7 +143,7 @@ func (cLog *ComLog) rotate() {
 
 func (cLog *ComLog) Debug(v ...interface{}) {
 	if cLog.LogLevel == LogLevelDebug {
-		out := fmt.Sprintf("[DEBUG][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), fmt.Sprint(v...))
+		out := fmt.Sprintf("[DEBUG][%d][%s] %s", goroutineid.GetGoID(), fmt.Sprint(v...))
 		cLog.LogCurSize += PrefixHeadLen + len(out)
 		cLog.Log.Output(3, out)
 		cLog.rotate()
@@ -154,7 +153,7 @@ func (cLog *ComLog) Debug(v ...interface{}) {
 func (cLog *ComLog) DebugF(format string, args ...interface{}) {
 	if cLog.LogLevel == LogLevelDebug {
 		msg := fmt.Sprintf(format, args...)
-		out := fmt.Sprintf("[DEBUG][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), msg)
+		out := fmt.Sprintf("[DEBUG][%d][%s] %s", goroutineid.GetGoID(), msg)
 		cLog.LogCurSize += PrefixHeadLen + len(out)
 		cLog.Log.Output(3, out)
 		cLog.rotate()
@@ -163,7 +162,7 @@ func (cLog *ComLog) DebugF(format string, args ...interface{}) {
 
 func (cLog *ComLog) Info(v ...interface{}) {
 	if cLog.LogLevel >= LogLevelInfo {
-		out := fmt.Sprintf("[INFO][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), fmt.Sprint(v...))
+		out := fmt.Sprintf("[INFO][%d][%s] %s", goroutineid.GetGoID(), fmt.Sprint(v...))
 		cLog.LogCurSize += PrefixHeadLen + len(out)
 		cLog.Log.Output(3, out)
 		cLog.rotate()
@@ -173,7 +172,7 @@ func (cLog *ComLog) Info(v ...interface{}) {
 func (cLog *ComLog) InfoF(format string, args ...interface{}) {
 	if cLog.LogLevel >= LogLevelInfo {
 		msg := fmt.Sprintf(format, args...)
-		out := fmt.Sprintf("[INFO][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), msg)
+		out := fmt.Sprintf("[INFO][%d][%s] %s", goroutineid.GetGoID(), msg)
 		cLog.LogCurSize += PrefixHeadLen + len(out)
 		cLog.Log.Output(3, out)
 		cLog.rotate()
@@ -182,7 +181,7 @@ func (cLog *ComLog) InfoF(format string, args ...interface{}) {
 
 func (cLog *ComLog) Warn(v ...interface{}) {
 	if cLog.LogLevel >= LogLevelWarn {
-		out := fmt.Sprintf("[WARN][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), fmt.Sprint(v...))
+		out := fmt.Sprintf("[WARN][%d][%s] %s", goroutineid.GetGoID(), fmt.Sprint(v...))
 		cLog.LogCurSize += PrefixHeadLen + len(out)
 		cLog.Log.Output(3, out)
 		cLog.rotate()
@@ -192,7 +191,7 @@ func (cLog *ComLog) Warn(v ...interface{}) {
 func (cLog *ComLog) WarnF(format string, args ...interface{}) {
 	if cLog.LogLevel >= LogLevelWarn {
 		msg := fmt.Sprintf(format, args...)
-		out := fmt.Sprintf("[WARN][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), msg)
+		out := fmt.Sprintf("[WARN][%d][%s] %s", goroutineid.GetGoID(), msg)
 		cLog.LogCurSize += PrefixHeadLen + len(out)
 		cLog.Log.Output(3, out)
 		cLog.rotate()
@@ -201,7 +200,7 @@ func (cLog *ComLog) WarnF(format string, args ...interface{}) {
 
 func (cLog *ComLog) Error(v ...interface{}) {
 	if cLog.LogLevel >= LogLevelError {
-		out := fmt.Sprintf("[ERRO][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), fmt.Sprint(v...))
+		out := fmt.Sprintf("[ERRO][%d][%s] %s", goroutineid.GetGoID(), fmt.Sprint(v...))
 		cLog.LogCurSize += PrefixHeadLen + len(out)
 		cLog.Log.Output(3, out)
 		cLog.rotate()
@@ -211,7 +210,7 @@ func (cLog *ComLog) Error(v ...interface{}) {
 func (cLog *ComLog) ErrorF(format string, args ...interface{}) {
 	if cLog.LogLevel >= LogLevelError {
 		msg := fmt.Sprintf(format, args...)
-		out := fmt.Sprintf("[ERRO][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), msg)
+		out := fmt.Sprintf("[ERRO][%d][%s] %s", goroutineid.GetGoID(), msg)
 		cLog.LogCurSize += PrefixHeadLen + len(out)
 		cLog.Log.Output(3, out)
 		cLog.rotate()

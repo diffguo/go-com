@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/chanxuehong/util/math"
 	"github.com/diffguo/gocom/goroutineid"
-	"github.com/diffguo/gocom/trace_id"
 	"log"
 	"os"
 	"strings"
@@ -23,7 +22,7 @@ type SizeLog struct {
 	FileFullName string
 	PFile        *os.File
 	Log          *log.Logger
-	M              sync.Mutex
+	M            sync.Mutex
 }
 
 func InitSizeLog(logDir string, logFile string, logStrLevel string, LogMaxSize int) (*SizeLog, error) {
@@ -106,7 +105,7 @@ func (slog *SizeLog) rotate() {
 
 func (slog *SizeLog) Debug(v ...interface{}) {
 	if slog.LogLevel == LogLevelDebug {
-		out := fmt.Sprintf("[DEBUG][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), fmt.Sprint(v...))
+		out := fmt.Sprintf("[DEBUG][%d][%s] %s", goroutineid.GetGoID(), fmt.Sprint(v...))
 		slog.LogCurSize += PrefixHeadLen + len(out)
 		slog.Log.Output(3, out)
 		slog.rotate()
@@ -116,7 +115,7 @@ func (slog *SizeLog) Debug(v ...interface{}) {
 func (slog *SizeLog) DebugF(format string, args ...interface{}) {
 	if slog.LogLevel == LogLevelDebug {
 		msg := fmt.Sprintf(format, args...)
-		out := fmt.Sprintf("[DEBUG][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), msg)
+		out := fmt.Sprintf("[DEBUG][%d][%s] %s", goroutineid.GetGoID(), msg)
 		slog.LogCurSize += PrefixHeadLen + len(out)
 		slog.Log.Output(3, out)
 		slog.rotate()
@@ -125,7 +124,7 @@ func (slog *SizeLog) DebugF(format string, args ...interface{}) {
 
 func (slog *SizeLog) Info(v ...interface{}) {
 	if slog.LogLevel >= LogLevelInfo {
-		out := fmt.Sprintf("[INFO][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), fmt.Sprint(v...))
+		out := fmt.Sprintf("[INFO][%d][%s] %s", goroutineid.GetGoID(), fmt.Sprint(v...))
 		slog.LogCurSize += PrefixHeadLen + len(out)
 		slog.Log.Output(3, out)
 		slog.rotate()
@@ -135,7 +134,7 @@ func (slog *SizeLog) Info(v ...interface{}) {
 func (slog *SizeLog) InfoF(format string, args ...interface{}) {
 	if slog.LogLevel >= LogLevelInfo {
 		msg := fmt.Sprintf(format, args...)
-		out := fmt.Sprintf("[INFO][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), msg)
+		out := fmt.Sprintf("[INFO][%d][%s] %s", goroutineid.GetGoID(), msg)
 		slog.LogCurSize += PrefixHeadLen + len(out)
 		slog.Log.Output(3, out)
 		slog.rotate()
@@ -144,7 +143,7 @@ func (slog *SizeLog) InfoF(format string, args ...interface{}) {
 
 func (slog *SizeLog) Warn(v ...interface{}) {
 	if slog.LogLevel >= LogLevelWarn {
-		out := fmt.Sprintf("[WARN][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), fmt.Sprint(v...))
+		out := fmt.Sprintf("[WARN][%d][%s] %s", goroutineid.GetGoID(), fmt.Sprint(v...))
 		slog.LogCurSize += PrefixHeadLen + len(out)
 		slog.Log.Output(3, out)
 		slog.rotate()
@@ -154,7 +153,7 @@ func (slog *SizeLog) Warn(v ...interface{}) {
 func (slog *SizeLog) WarnF(format string, args ...interface{}) {
 	if slog.LogLevel >= LogLevelWarn {
 		msg := fmt.Sprintf(format, args...)
-		out := fmt.Sprintf("[WARN][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), msg)
+		out := fmt.Sprintf("[WARN][%d][%s] %s", goroutineid.GetGoID(), msg)
 		slog.LogCurSize += PrefixHeadLen + len(out)
 		slog.Log.Output(3, out)
 		slog.rotate()
@@ -163,7 +162,7 @@ func (slog *SizeLog) WarnF(format string, args ...interface{}) {
 
 func (slog *SizeLog) Error(v ...interface{}) {
 	if slog.LogLevel >= LogLevelError {
-		out := fmt.Sprintf("[ERRO][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), fmt.Sprint(v...))
+		out := fmt.Sprintf("[ERRO][%d][%s] %s", goroutineid.GetGoID(), fmt.Sprint(v...))
 		slog.LogCurSize += PrefixHeadLen + len(out)
 		slog.Log.Output(3, out)
 		slog.rotate()
@@ -173,7 +172,7 @@ func (slog *SizeLog) Error(v ...interface{}) {
 func (slog *SizeLog) ErrorF(format string, args ...interface{}) {
 	if slog.LogLevel >= LogLevelError {
 		msg := fmt.Sprintf(format, args...)
-		out := fmt.Sprintf("[ERRO][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), msg)
+		out := fmt.Sprintf("[ERRO][%d][%s] %s", goroutineid.GetGoID(), msg)
 		slog.LogCurSize += PrefixHeadLen + len(out)
 		slog.Log.Output(3, out)
 		slog.rotate()

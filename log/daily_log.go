@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/chanxuehong/util/math"
 	"github.com/diffguo/gocom/goroutineid"
-	"github.com/diffguo/gocom/trace_id"
 	"log"
 	"os"
 	"strings"
@@ -23,7 +22,7 @@ type DailyLog struct {
 	FileFullName  string
 	PFile         *os.File
 	Log           *log.Logger
-	M              sync.Mutex
+	M             sync.Mutex
 }
 
 func InitDailyLog(logDir string, logFile string, logStrLevel string) (*DailyLog, error) {
@@ -72,7 +71,7 @@ func InitDailyLog(logDir string, logFile string, logStrLevel string) (*DailyLog,
 
 func (dLog *DailyLog) rotate() {
 	now := time.Now()
-	if now.Year() != dLog.LastCheckTime.Year() || now.Month() != dLog.LastCheckTime.Month()  || now.Day() != dLog.LastCheckTime.Day() {
+	if now.Year() != dLog.LastCheckTime.Year() || now.Month() != dLog.LastCheckTime.Month() || now.Day() != dLog.LastCheckTime.Day() {
 		dLog.M.Lock()
 		defer dLog.M.Unlock()
 
@@ -106,7 +105,7 @@ func (dLog *DailyLog) rotate() {
 
 func (dLog *DailyLog) Debug(v ...interface{}) {
 	if dLog.LogLevel == LogLevelDebug {
-		out := fmt.Sprintf("[DEBUG][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), fmt.Sprint(v...))
+		out := fmt.Sprintf("[DEBUG][%d][%s] %s", goroutineid.GetGoID(), fmt.Sprint(v...))
 		dLog.LogCurSize += PrefixHeadLen + len(out)
 		dLog.Log.Output(3, out)
 		dLog.rotate()
@@ -116,7 +115,7 @@ func (dLog *DailyLog) Debug(v ...interface{}) {
 func (dLog *DailyLog) DebugF(format string, args ...interface{}) {
 	if dLog.LogLevel == LogLevelDebug {
 		msg := fmt.Sprintf(format, args...)
-		out := fmt.Sprintf("[DEBUG][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), msg)
+		out := fmt.Sprintf("[DEBUG][%d][%s] %s", goroutineid.GetGoID(), msg)
 		dLog.LogCurSize += PrefixHeadLen + len(out)
 		dLog.Log.Output(3, out)
 		dLog.rotate()
@@ -125,7 +124,7 @@ func (dLog *DailyLog) DebugF(format string, args ...interface{}) {
 
 func (dLog *DailyLog) Info(v ...interface{}) {
 	if dLog.LogLevel >= LogLevelInfo {
-		out := fmt.Sprintf("[INFO][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), fmt.Sprint(v...))
+		out := fmt.Sprintf("[INFO][%d][%s] %s", goroutineid.GetGoID(), fmt.Sprint(v...))
 		dLog.LogCurSize += PrefixHeadLen + len(out)
 		dLog.Log.Output(3, out)
 		dLog.rotate()
@@ -135,7 +134,7 @@ func (dLog *DailyLog) Info(v ...interface{}) {
 func (dLog *DailyLog) InfoF(format string, args ...interface{}) {
 	if dLog.LogLevel >= LogLevelInfo {
 		msg := fmt.Sprintf(format, args...)
-		out := fmt.Sprintf("[INFO][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), msg)
+		out := fmt.Sprintf("[INFO][%d][%s] %s", goroutineid.GetGoID(), msg)
 		dLog.LogCurSize += PrefixHeadLen + len(out)
 		dLog.Log.Output(3, out)
 		dLog.rotate()
@@ -144,7 +143,7 @@ func (dLog *DailyLog) InfoF(format string, args ...interface{}) {
 
 func (dLog *DailyLog) Warn(v ...interface{}) {
 	if dLog.LogLevel >= LogLevelWarn {
-		out := fmt.Sprintf("[WARN][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), fmt.Sprint(v...))
+		out := fmt.Sprintf("[WARN][%d][%s] %s", goroutineid.GetGoID(), fmt.Sprint(v...))
 		dLog.LogCurSize += PrefixHeadLen + len(out)
 		dLog.Log.Output(3, out)
 		dLog.rotate()
@@ -154,7 +153,7 @@ func (dLog *DailyLog) Warn(v ...interface{}) {
 func (dLog *DailyLog) WarnF(format string, args ...interface{}) {
 	if dLog.LogLevel >= LogLevelWarn {
 		msg := fmt.Sprintf(format, args...)
-		out := fmt.Sprintf("[WARN][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), msg)
+		out := fmt.Sprintf("[WARN][%d][%s] %s", goroutineid.GetGoID(), msg)
 		dLog.LogCurSize += PrefixHeadLen + len(out)
 		dLog.Log.Output(3, out)
 		dLog.rotate()
@@ -163,7 +162,7 @@ func (dLog *DailyLog) WarnF(format string, args ...interface{}) {
 
 func (dLog *DailyLog) Error(v ...interface{}) {
 	if dLog.LogLevel >= LogLevelError {
-		out := fmt.Sprintf("[ERRO][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), fmt.Sprint(v...))
+		out := fmt.Sprintf("[ERRO][%d][%s] %s", goroutineid.GetGoID(), fmt.Sprint(v...))
 		dLog.LogCurSize += PrefixHeadLen + len(out)
 		dLog.Log.Output(3, out)
 		dLog.rotate()
@@ -173,7 +172,7 @@ func (dLog *DailyLog) Error(v ...interface{}) {
 func (dLog *DailyLog) ErrorF(format string, args ...interface{}) {
 	if dLog.LogLevel >= LogLevelError {
 		msg := fmt.Sprintf(format, args...)
-		out := fmt.Sprintf("[ERRO][%d][%s] %s", goroutineid.GetGoID(), trace_id.GetTraceId(), msg)
+		out := fmt.Sprintf("[ERRO][%d][%s] %s", goroutineid.GetGoID(), msg)
 		dLog.LogCurSize += PrefixHeadLen + len(out)
 		dLog.Log.Output(3, out)
 		dLog.rotate()

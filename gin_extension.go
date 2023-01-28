@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/diffguo/gocom/log"
-	"github.com/diffguo/gocom/trace_id"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"io/ioutil"
@@ -50,8 +49,6 @@ func isDebugLog() bool {
 
 func GinLogger(threshold time.Duration) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		trace_id.SaveTraceId(c.GetHeader(trace_id.TraceIDName))
-
 		if isDebugLog() {
 			if c.Request.Method == http.MethodGet {
 				log.DebugF("[GIN DEBUG] %s %s URL: %s Header: %+v", c.Request.Method, c.Request.Proto,
@@ -144,7 +141,7 @@ func getRequestData(c *gin.Context) string {
 // swagger:model
 type FailResponse struct {
 	// 错误码。0为正常返回，其它为异常，异常时ErrDesc为异常描述。 固定的异常描述请存储于err_code_def.go文件中
-	ErrCode int    `json:"err_code"`
+	ErrCode int `json:"err_code"`
 	// 错误信息。可展示在页面上
 	ErrDesc string `json:"err_desc"`
 	// 用于定位某次调用的ID，客户端应该在错误时显示(ErrCode:TraceId)
@@ -154,7 +151,7 @@ type FailResponse struct {
 // swagger:model
 type SimpleResponse struct {
 	// 错误码。这里的值为0，主要是为了返回体中有ErrCode字段
-	ErrCode int    `json:"err_code"`
+	ErrCode int `json:"err_code"`
 	// 返回的内容
 	Content string `json:"content"`
 }
@@ -162,7 +159,7 @@ type SimpleResponse struct {
 // swagger:model
 type ResponseBase struct {
 	// 错误码。这里的值为0，主要是为了返回体中有ErrCode字段
-	ErrCode int    `json:"err_code"`
+	ErrCode int `json:"err_code"`
 }
 
 func SendSuccSimpleResponse(c *gin.Context, content string) {
@@ -178,7 +175,7 @@ func SendSuccResponse(c *gin.Context, resp interface{}) {
 
 func SendFailResponse(c *gin.Context, errCode int, errDesc string) {
 	c.Writer.Header().Set("Content-Type", "application/json")
-	resp := FailResponse{ErrCode:errCode, ErrDesc: errDesc, TraceId: trace_id.GetTraceId()}
+	resp := FailResponse{ErrCode: errCode, ErrDesc: errDesc, TraceId: ""}
 	c.JSON(errCode, resp)
 }
 
