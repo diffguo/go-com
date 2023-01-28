@@ -16,6 +16,8 @@ var (
 )
 
 func GetGoID() int64 {
+	return 0
+
 	gp := G()
 
 	if gp == nil {
