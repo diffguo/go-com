@@ -25,17 +25,17 @@ func TimeCounter() func() {
 	f := runtime.FuncForPC(pc[0])
 
 	start := time.Now()
-	if log.GSizeLog != nil {
-		log.InfoF("enter func: %s\n", f.Name())
+	if log.GLog != nil {
+		log.InfoF("[%d] enter func: %s", goroutineid.GetGoID(), f.Name())
 	} else {
-		fmt.Printf("[%d] enter func: %s\n", goroutineid.GetGoID(), f.Name())
+		fmt.Printf("[%s][%d] enter func: %s\n", time.Now().Format(StdTimeWithMsec), goroutineid.GetGoID(), f.Name())
 	}
 
 	return func() {
-		if log.GSizeLog != nil {
-			log.InfoF("exit func: %s after: %s \n", f.Name(), time.Since(start))
+		if log.GLog != nil {
+			log.InfoF("[%d] exit func: %s after: %s \n", goroutineid.GetGoID(), f.Name(), time.Since(start))
 		} else {
-			fmt.Printf("[%d] exit func: %s after: %s \n", goroutineid.GetGoID(), f.Name(), time.Since(start))
+			fmt.Printf("[%s][%d] exit func: %s after: %s \n", time.Now().Format(StdTimeWithMsec), goroutineid.GetGoID(), f.Name(), time.Since(start))
 		}
 	}
 }

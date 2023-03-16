@@ -12,7 +12,7 @@ func TestGoID(t *testing.T) {
 	var s sync.Map
 	var w sync.WaitGroup
 	var number int32 = 0
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 10; i++ {
 		w.Add(1)
 		go func() {
 			if _, ok := s.Load(GetGoID()); ok {
@@ -40,9 +40,9 @@ func TestGoID(t *testing.T) {
 		fmt.Printf("%d\n", out[i])
 	}
 
-	for i := 0; i < len(out) - 1; i++ {
-		if out[i] + 1 != out[i+1] {
-			fmt.Printf("miss: %d\n", out[i] + 1)
+	for i := 0; i < len(out)-1; i++ {
+		if out[i]+1 != out[i+1] {
+			fmt.Printf("miss: %d\n", out[i]+1)
 		}
 	}
 

@@ -1,6 +1,7 @@
 package goroutineid
 
 import (
+	"github.com/petermattis/goid"
 	"sync"
 	"unsafe"
 )
@@ -16,34 +17,38 @@ var (
 )
 
 func GetGoID() int64 {
-	return 0
-
-	gp := G()
-
-	if gp == nil {
-		return 0
-	}
-
-	goIdMu.RLock()
-	goId, ok := goIdDataMap[gp]
-	goIdMu.RUnlock()
-
-	if ok {
-		return goId
-	}
-
-	// 新的goruntine
-	goIdMu.Lock()
-	defer goIdMu.Unlock()
-
-	maxProximateGoID = maxProximateGoID + 1
-	goIdDataMap[gp] = maxProximateGoID
-	if !hack(gp) {
-		delete(goIdDataMap, gp)
-	}
-
-	return maxProximateGoID
+	return goid.Get()
 }
+
+//func GetGoID() int64 {
+//	//return 0
+//
+//	gp := G()
+//
+//	if gp == nil {
+//		return 0
+//	}
+//
+//	goIdMu.RLock()
+//	goId, ok := goIdDataMap[gp]
+//	goIdMu.RUnlock()
+//
+//	if ok {
+//		return goId
+//	}
+//
+//	// 新的goruntine
+//	goIdMu.Lock()
+//	defer goIdMu.Unlock()
+//
+//	maxProximateGoID = maxProximateGoID + 1
+//	goIdDataMap[gp] = maxProximateGoID
+//	if !hack(gp) {
+//		delete(goIdDataMap, gp)
+//	}
+//
+//	return maxProximateGoID
+//}
 
 func resetAtExit() {
 	gp := G()
